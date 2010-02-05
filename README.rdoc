@@ -1,6 +1,6 @@
 = ShadowGraph
 
-ShadowGraph is yet another YouTube copy written with Ruby on Rails. It succeed Video-App by <a href = "http://ralphedge.com">Ralph Edge</a> and inspired by <a href = "http://pandastream.com">Panda</a>.
+ShadowGraph is yet another YouTube copy written with Ruby on Rails. It succeed Video-App by Ralph Edge: http://ralphedge.com and inspired by Panda: http://pandastream.com.
 
 == Install and use
 
@@ -13,7 +13,7 @@ ShadowGraph is yet another YouTube copy written with Ruby on Rails. It succeed V
 
 Edit your config/databases.yml
   
-  cp config/databases.yml.sample config/databases.yml
+  cp config/database.yml.sample config/database.yml
 
 Edit app config
   
@@ -26,6 +26,7 @@ You may need to download and compile from source - http://www.ffmpeg.org/downloa
 In Ubuntu:
   
   sudo apt-get install ffmpeg
+  
 In Mac OS:
   
   sudo port install ffmpeg
@@ -41,9 +42,9 @@ Install the latest newbamboo forked rvideo to complicate ffmpeg 0.5
   rake repackage
   sudo rake install
   
-=== 5. Install flvtools2
+=== 5. Install flvtool2
 
-  sudo gem install flvtools2
+  sudo gem install flvtool2
 
 Maybe you need do this:
   
@@ -51,7 +52,11 @@ Maybe you need do this:
 
 === 6. Install the others gems
 
-  $ sudo rake gems:install
+  sudo rake gems:install
+  
+If you use Linux, you should  
+  
+  sudo gem install RubyInline
 
 === 7. Create database and seed data
 
@@ -67,13 +72,21 @@ Or
 
 === 8. Launch server
   
-  ./script/server  
+  ./script/server
+  
+=== 9. Login with default user
+
+Login http://localhost:3000 with
+  
+  login/password admin/123456
+
+Then change your pw  
 
 == Can you help?
 
-  * Testing
-  * i18n
-  * UI
+* Testing
+* i18n
+* UI
 
 == Helpful links
 
