@@ -8,7 +8,11 @@ class User < ActiveRecord::Base
     { :conditions => { :state => state } }
   }
 
-  acts_as_authentic
+  before_save :add_user_role
+
+  acts_as_authentic do |c|
+    c.validate_password_field = false
+  end
 
   # acl9插件的subject模型
   acts_as_authorization_subject
@@ -23,6 +27,21 @@ class User < ActiveRecord::Base
     event :unsuspend   do transition :suspended => :normal end
     event :soft_delete do transition all- :soft_deleted => :soft_deleted end
     event :resume      do transition :soft_deleted => :pending end      
+  end
+  
+  def self.build_from_openid(openid)
+    returning User.new do |user|
+      user.login = openid['nickname']
+      user.email = openid['email']
+      user.openid_identifier = openid['openid_identifier']
+    end
+  end
+  
+private  
+
+  def add_user_role
+    user_role = Role.find_by_name("user")
+    self.roles << user_role if user_role and self.roles.empty?
   end
 
 end

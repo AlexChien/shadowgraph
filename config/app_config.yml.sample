@@ -10,6 +10,11 @@ default: &default
   session:
     session_key: _shadowgraph_session
     secret: 'Your secret string. To get one -- rake secret'
+  ey_cookie_passport:
+    public_key_path: /Users/stainless/public.pem
+  eycp_domain: .localhost.com
+  eycp_root: 'openid.localhost.com'
+  eycp_register: 'http://openid.localhost.com:3030/account/new'
     
 development:
   <<: *default
@@ -19,6 +24,11 @@ test:
 
 production:
   <<: *default
-  name: shadowgraph
-  descp: 是个rails视频网站  
+  name: 星尚视频
+  descp: 是星尚旗下的视频网站服务  
   web_server: nginx
+  ey_cookie_passport:
+    public_key_path: /path/to/server's/eycp/public.pem
+  eycp_domain: .enjoyoung.cn
+  eycp_root: 'http://openid.enjoyoung.cn'  
+  eycp_register: 'http://openid.enjoyoung.cn/account/new'    

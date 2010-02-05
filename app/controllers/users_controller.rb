@@ -33,8 +33,12 @@ class UsersController < ApplicationController
 
   # GET /users/new
   # GET /users/new.xml
+  # def new
+  #   @user = User.new
+  # end
+  
   def new
-    @user = User.new
+    head "404"
   end
 
   # GET /users/1/edit
@@ -44,15 +48,19 @@ class UsersController < ApplicationController
 
   # POST /users
   # POST /users.xml
-  def create
-    @user = User.new(params[:user])
+  # def create
+  #   @user = User.new(params[:user])
+  # 
+  #   if @user.save
+  #     flash[:notice] = 'Account Registered!'
+  #     redirect_back_or_default account_url
+  #   else
+  #     render :action => "new"
+  #   end
+  # end
 
-    if @user.save
-      flash[:notice] = 'Account Registered!'
-      redirect_back_or_default account_url
-    else
-      render :action => "new"
-    end
+  def create
+    head "404"
   end
 
   # PUT /users/1

@@ -1,5 +1,7 @@
 ActionController::Routing::Routes.draw do |map|
   
+	map.root :controller => 'videos'
+  
   map.signup '/signup', :controller => 'users',    :action => 'new'
   map.login  '/login',  :controller => 'user_sessions', :action => 'new'
   map.logout '/logout', :controller => 'user_sessions', :action => 'destroy'
@@ -25,7 +27,7 @@ ActionController::Routing::Routes.draw do |map|
   map.resources :users
 	map.resource :account, :controller => "users"
 
-	map.root :controller => 'videos'
+  map.open_id_complete 'session', :controller => "user_sessions", :action => "create", :requirements => { :method => :get }	
 	map.resource :user_session
 	map.resources :videos
 	map.resources :tags

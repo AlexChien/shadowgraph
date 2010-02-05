@@ -126,6 +126,7 @@ zh-CN:
   notice: "注意"
   error: "出错啦"
   login_successful: "成功登陆"
+  signe_up_successful: "注册登陆成功"
   logout_successful: "成功退出"
   confirm_logout: "真要登出吗?"
   login_count: "登陆次数"

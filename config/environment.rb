@@ -14,6 +14,8 @@ Rails::Initializer.run do |config|
   
   # 加载应用配置信息
   CONFIG = YAML.load_file("#{RAILS_ROOT}/config/app_config.yml")[RAILS_ENV]
+  RSA_KEY = CONFIG['ey_cookie_passport']
+  EYCP_DOMAIN = CONFIG['eycp_domain']
   
   # Settings in config/environments/* take precedence over those specified here.
   # Application configuration should go into files in config/initializers
@@ -52,6 +54,8 @@ Rails::Initializer.run do |config|
   # config.gem "acl9", :source => "http://gemcutter.org", :lib => "acl9" # 用plugin版
   # mime-types插件
   # config.gem 'mime-types', :lib => 'mime/types' # 用mimetype_fu代替
+  # openid插件
+  config.gem "ruby-openid", :lib => 'openid', :version => '>=2.1.2'
 
   # Only load the plugins named here, in the order given. By default, all plugins 
   # in vendor/plugins are loaded in alphabetical order.
