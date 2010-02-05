@@ -22,7 +22,7 @@ set :scm_verbose, true
 set :branch, "master"
 #set :scm_user, 'alexchien'
 #set :scm_passphrase, "alexgem"
-set :repository,  "git@github.com:AlexChien/video-app.git"
+set :repository,  "git@github.com:AlexChien/shadowgraph.git"
 set :deploy_via, :remote_cache
 
 # 180 上跑rails应用的用户

@@ -12,7 +12,7 @@ class VideosController < ApplicationController
     # allow anonymous, :to => [:index, :show]
   end
 
-  # skip_before_filter :verify_authenticity_token  # 测试用
+  skip_before_filter :verify_authenticity_token, :only =>[:create]  # 供美食上传视频用
 
   def index
     @videos = Video.publiced.paginate :page => params[:page], :order => 'created_at DESC', :per_page => 12
