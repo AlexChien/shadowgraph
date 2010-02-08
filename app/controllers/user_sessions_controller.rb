@@ -47,21 +47,13 @@ private
   def password_authentication
     @user_session = UserSession.new(params[:user_session])
     success = @user_session.save
-    respond_to do |format|
-      format.html do
-        if success
-          flash[:notice] = t("login_successful")
-          redirect_back_or_default products_path
-        else
-          flash.now[:error] = t("login_failed")
-          render :new
-        end
-      end
-      format.js do
-        user = success ? @user_session.record : nil
-        render :json => user ? {:ship_address => user.ship_address, :bill_address => user.bill_address}.to_json : success.to_json
-      end
-    end     
+    if success
+      flash[:notice] = t("login_successful")
+      redirect_back_or_default videos_path
+    else
+      flash.now[:error] = t("login_failed")
+      render :new
+    end 
   end
 
   def open_id_authentication
@@ -72,18 +64,12 @@ private
       if result.successful?
         if user = User.find_by_openid_identifier(openid_identifier)
           # debugger
-          @current_user_session = UserSession.new(user, true) #用authlogic维护session
-          @current_user_session.save
-          flash[:notice] = t("login_successful")
-          redirect_back_or_default videos_path
+          create_session(user)
         else
           # debugger
           user = User.build_from_openid(registration.merge('openid_identifier' => openid_identifier))
           if user.save
-            @current_user_session = UserSession.new(user, true) #用authlogic维护session
-            @current_user_session.save
-            flash[:notice] = t("signe_up_successful")
-            redirect_back_or_default videos_path
+            create_session(user)
           else
             session[:openid_attributes] = user.attributes
             flash[:notice] = "It looks like you don't have an account yet, please create one below."
@@ -95,6 +81,13 @@ private
         render :action => 'new'
       end
     end
+  end
+  
+  def create_session(user)
+    @current_user_session = UserSession.new(user, true) #用authlogic维护session
+    @current_user_session.save
+    flash[:notice] = t("signe_up_successful")
+    redirect_back_or_default videos_path
   end
 
 end

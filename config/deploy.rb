@@ -4,8 +4,8 @@ set :deploy_to, "/usr/local/webservice/htdocs/#{application}"
 # Edit Capfile and add the following to it. This ensures that remote capistrano deployment does not fork a remote shell using command “sh -c”. Some hosting servers do not allow remote shells.
 default_run_options[:shell] = false
 
-set :use_sudo, true
-# set :use_sudo, false
+# set :use_sudo, true
+set :use_sudo, false
 
 # Whatever you set here will be taken set as the default RAILS_ENV value
 # on the server. Your app and your hourly/daily/weekly/monthly scripts

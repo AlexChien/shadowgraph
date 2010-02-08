@@ -21,6 +21,7 @@ class VideosController < ApplicationController
   def new
     flash[:notice] = "上传视频文件不能超过#{CONFIG['max_upload_file_size']}MB"
     @video = Video.new
+    render('/videos/new_iframe', :layout => false) if params[:iframe] == "true"
   end
 
   def create

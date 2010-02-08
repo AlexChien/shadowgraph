@@ -71,7 +71,6 @@ private
     begin
       eycp_key = OpenSSL::PKey::RSA.new(File.read(RSA_KEY['public_key_path']))
       cookie_passport = eycp_key.public_decrypt(Base64.decode64(cookies[:eycp])) unless cookies[:eycp].blank?
-      debugger
       if cookie_passport && cookie_passport.include?(CONFIG['eycp_root'])
         cp         = cookie_passport.split("\t")
         openid_url = cp[0] # openid
