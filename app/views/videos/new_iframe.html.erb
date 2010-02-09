@@ -53,8 +53,11 @@ $(document).ready(function() {
     // <%# 上传成功后redirect到视频页面 %>
     onComplete: function (evt, queueID, fileObj, response, data) {
       var v_id = response.match(/id\=(\d+)/)[1];
+      var title = response.match(/title\=(\d+)/)[1];
+      var desc = response.match(/desc\=(\d+)/)[1];
       // alert(v_id);
-      window.location = "/videos/"+v_id;
+      // url = window.location = "/videos/"+v_id;
+      url = v_id;
       write_parent_video_info(title,desc,url);
       submit_parent_video_form();
     },    

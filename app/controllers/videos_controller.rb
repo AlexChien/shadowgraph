@@ -34,7 +34,7 @@ class VideosController < ApplicationController
     if @video.save
       if request.env['HTTP_USER_AGENT'] =~ /^(Adobe|Shockwave) Flash/
         # head(:ok, :id => @video.id) and return
-        render :text => "id=#{@video.id}"
+        render :text => "id=#{@video.id} title=#{@video.title} desc=#{@video.description}"
       else
         # @video.convert
         flash[:notice] = '视频文件已成功上传'
