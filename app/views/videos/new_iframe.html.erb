@@ -1,6 +1,6 @@
 <script>
   document.domain = "enjoyoung.cn";
-<%= if false %>
+<% if false %>
 // 下面简单使用Jquery来操作iframe的一些记录，这个使用纯JS也可以实现。
 // 第一、在iframe中查找父页面元素的方法：
 // $('#id', window.parent.document)
@@ -14,7 +14,7 @@
     // parent.document.getElementById("openid_input").innerHTML = "http://openid.com";
     $('#tv_name', window.parent.document).val(title);
     $('#t_intro', window.parent.document).val(desc);
-    $('#tv_flv_ur]', window.parent.document).val(url);
+    $('#tv_flv_ur', window.parent.document).val(url);
   }
   function submit_parent_video_form(){
     $('#new_tv', window.parent.document).submit();
