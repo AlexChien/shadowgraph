@@ -57,7 +57,7 @@ $(document).ready(function() {
       var desc = response.match(/desc\=(\d+)/)[1];
       // alert(v_id);
       // url = window.location = "/videos/"+v_id;
-      url = v_id;
+      var url = v_id;
       write_parent_video_info(title,desc,url);
       submit_parent_video_form();
     },    
