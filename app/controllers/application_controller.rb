@@ -34,6 +34,8 @@ private
   def check_current_eycp
     if has_eycp?
       @current_user = login_from_enjoyoung_cookie_passport unless current_user
+    else
+      current_user_session.destroy if current_user_session
     end
   end
 

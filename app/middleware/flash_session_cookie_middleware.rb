@@ -11,8 +11,8 @@ class FlashSessionCookieMiddleware
     if env['HTTP_USER_AGENT'] =~ /^(Adobe|Shockwave) Flash/
       # params = ::Rack::Utils.parse_query(env['QUERY_STRING']) #老版本的rack
       params = Rack::Request.new(env).params
-      unless params[@session_key].nil?
-        env['HTTP_COOKIE'] = "#{@session_key}=#{params[@session_key]}".freeze
+      unless params['eycp'].nil?
+        env['HTTP_COOKIE'] = "eycp=#{params['eycp']}; #{@session_key}=#{params[@session_key]}".freeze
       end
     end
     
