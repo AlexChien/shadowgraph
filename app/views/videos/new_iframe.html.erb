@@ -1,3 +1,26 @@
+<script>
+  document.domain = "enjoyoung.cn";
+<%= if false %>
+// 下面简单使用Jquery来操作iframe的一些记录，这个使用纯JS也可以实现。
+// 第一、在iframe中查找父页面元素的方法：
+// $('#id', window.parent.document)
+// 第二、在父页面中获取iframe中的元素方法：
+// $('#iframe').contents().find('#input')
+// 第三、在iframe中调用父页面中定义的方法和变量：
+// parent.method
+// parent.value
+<% end %>
+  function  write_parent_video_info (title,desc,url){
+    // parent.document.getElementById("openid_input").innerHTML = "http://openid.com";
+    $('#tv_name', window.parent.document).val(title);
+    $('#t_intro', window.parent.document).val(desc);
+    $('#tv_flv_ur]', window.parent.document).val(url);
+  }
+  function submit_parent_video_form(){
+    $('#new_tv', window.parent.document).submit();
+  }
+</script>
+
 <!-- 新建视频 开始 -->
 <%# debugger %>
 <%= stylesheet_link_tag "http://#{request.host_with_port}/stylesheets/uploadify" %>
@@ -32,7 +55,8 @@ $(document).ready(function() {
       var v_id = response.match(/id\=(\d+)/)[1];
       // alert(v_id);
       window.location = "/videos/"+v_id;
-      $('#url_input').val("/videos/"+v_id);
+      write_parent_video_info(title,desc,url);
+      submit_parent_video_form();
     },    
   });
 });
