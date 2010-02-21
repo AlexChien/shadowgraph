@@ -35,6 +35,7 @@ test:
 production:
   <<: *default
   name: 星尚视频
+  root_domain: enjoyoung.cn
   descp: 是星尚旗下的视频网站服务  
   web_server: nginx
   ey_cookie_passport:
