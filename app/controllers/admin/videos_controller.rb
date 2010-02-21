@@ -78,6 +78,7 @@ class Admin::VideosController < ApplicationController
       @video.resume!
       @video.audit!
       @video.no_encode!
+      @video.publish! # 不需编码的也能发布      
       flash[:notice] = "不编码，已发布原始视频"
     when "手动编码"
       @video.fore_encode! # 将状态改为编码中才可使用paperclip的video_encoding processer
@@ -88,6 +89,7 @@ class Admin::VideosController < ApplicationController
         @video.converted! # 编码结束
         ended_at = Time.now
         @video.encoded_at = ended_at
+        @video.publish! # 编码结束后才能发布
         @video.save!
         @video.encoding_time = (ended_at - begun_at).to_i
         flash[:notice] = "视频已手动编码完成"

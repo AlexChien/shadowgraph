@@ -1,7 +1,7 @@
 # 视频管理和编码模型
 class Video < ActiveRecord::Base
   
-  named_scope :publiced, :conditions => [ "state = 'converted' OR state = 'no_encoding'"]
+  named_scope :published, :conditions => {:state => 'published'}
   named_scope :pending, :conditions => {:state => 'pending'}
   named_scope :audited, :conditions => {:state => 'audited'}
   named_scope :no_encoding, :conditions => {:state => 'no_encoding'}
@@ -68,8 +68,9 @@ class Video < ActiveRecord::Base
     event :resume      do transition [:error, :canceled, :soft_deleted] => :pending end
     event :cancel      do transition all - :canceled => :canceled end
     event :soft_delete do transition all - :soft_deleted => :soft_deleted end
+    event :publish     do transition [:converted, :no_encoding] => :published end
   end
-  
+
   # 视频编码信息
   attr_accessor :duration, :container, :width, :height, 
               :video_codec, :video_bitrate, :fps, 
@@ -99,6 +100,7 @@ class Video < ActiveRecord::Base
             ended_at = Time.now
             queued_video.encoded_at = ended_at
             queued_video.encoding_time = (ended_at - begun_at).to_i
+            queued_video.publish! # 编码结束后才能发布
             queued_video.save!
           rescue PaperclipError => e
             flash[:notice] = e
