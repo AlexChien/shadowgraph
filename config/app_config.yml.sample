@@ -15,6 +15,16 @@ default: &default
   eycp_domain: .localhost.com
   eycp_root: 'openid.localhost.com'
   eycp_register: 'http://openid.localhost.com:3030/account/new'
+  meishi:
+    url: http://meishi.localhost.com:3000  
+    adapter: mysql
+    encoding: utf8
+    host:
+    database: enjoyoung_production
+    pool: 5
+    username: root
+    password:
+    # socket: /var/run/mysqld/mysqld.sock  
     
 development:
   <<: *default
@@ -31,4 +41,14 @@ production:
     public_key_path: /path/to/server's/eycp/public.pem
   eycp_domain: .enjoyoung.cn
   eycp_root: 'http://openid.enjoyoung.cn/'  
-  eycp_register: 'http://openid.enjoyoung.cn/account/new'    
+  eycp_register: 'http://openid.enjoyoung.cn/account/new'
+  meishi:
+    url: http://meishi.enjoyoung.cn
+    adapter: mysql
+    encoding: utf8
+    host:
+    database: enjoyoung_production
+    pool: 5
+    username: root
+    password:
+    # socket: /var/run/mysqld/mysqld.sock   
