@@ -20,8 +20,9 @@ class Video < ActiveRecord::Base
   
   acts_as_taggable
 
-  belongs_to :user
+  has_one :tv
   has_many :replies, :class_name => 'VideoReply'
+  belongs_to :user
 
   # # paperclip提供的附件管理功能
   has_attached_file :asset,
@@ -97,7 +98,7 @@ class Video < ActiveRecord::Base
             queued_video.converted! # 编码结束
             ended_at = Time.now
             queued_video.encoded_at = ended_at
-            queued_video.encoding_time = ended_at - begun_at
+            queued_video.encoding_time = (ended_at - begun_at).to_i
             queued_video.save!
           rescue PaperclipError => e
             flash[:notice] = e
@@ -172,8 +173,8 @@ protected
   def set_new_filename
     path=self.asset.path
     current_format = File.extname(path)
-    basename       = File.basename(path, current_format)    
-    update_attribute(:filename, basename)    
+    basename       = File.basename(path, current_format)   
+    update_attribute(:filename, basename)
   end
 
 end

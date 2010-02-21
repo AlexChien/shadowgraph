@@ -21,7 +21,8 @@ class VideosController < ApplicationController
   def new
     flash[:notice] = "上传视频文件不能超过#{CONFIG['max_upload_file_size']}MB"
     @video = Video.new
-    render('/videos/new_iframe', :layout => false) if params[:iframe] == "true"
+    render('/meishi/videos/new_iframe', :layout => false) if params[:iframe] == "true"
+    render('/meishi/videos/share_dv_iframe', :layout => false) if params[:iframe] == "share_dv"
   end
 
   def create
@@ -32,6 +33,7 @@ class VideosController < ApplicationController
     # @video.asset_content_type = MIME::Types.type_for(@video.asset.original_filename).to_s
     @video.asset_content_type = File.mime_type?(@video.asset.original_filename)
     if @video.save
+      create_meishi_tv if params[:tv] # 直接操作meishi的tv模型
       if request.env['HTTP_USER_AGENT'] =~ /^(Adobe|Shockwave) Flash/
         # head(:ok, :id => @video.id) and return
         render :text => "id=#{@video.id} title=#{@video.title} desc=#{@video.description}"
@@ -75,6 +77,19 @@ private
  
   def find_video
     @video = Video.find(params[:id])
+  end
+  
+  # 直接操作meishi的tv模型
+  def create_meishi_tv
+    tv              = Tv.new 
+    tv.name         = @video.title
+    tv.intro        = @video.description
+    tv.flv_url      = @video.asset.url
+    tv.dv_type      = 2 # shadowgraph创建的视频类型。重要！meishi根据这个类型生成视频url。
+    tv.is_published = 0
+    tv.user_id      = params[:tv][:user_id]
+    tv.article_category_id = params[:tv][:cat_id]       
+    tv.save    
   end
 
 end

@@ -33,7 +33,6 @@ class Admin::VideosController < ApplicationController
                                  :per_page => 6)
       end
     end
-
   end
 
   # 显示视频编码详细信息
@@ -43,8 +42,9 @@ class Admin::VideosController < ApplicationController
 
   def edit
     @video.meta_info
+    render('/meishi/admin/videos/iframe_form', :layout => false) if params[:iframe] == "laotao"
   end
-  
+
   def update
     case  params[:commit]
     when "审核通过"
@@ -89,14 +89,19 @@ class Admin::VideosController < ApplicationController
         ended_at = Time.now
         @video.encoded_at = ended_at
         @video.save!
-        @video.encoding_time = ended_at - begun_at
+        @video.encoding_time = (ended_at - begun_at).to_i
         flash[:notice] = "视频已手动编码完成"
       rescue
         @video.failure! # 编码出错
         flash[:notice] = "编码时出错"
       end
     end
-    redirect_to edit_admin_video_path(@video)
+    if params[:iframe] == "laotao"
+      modify_meishi_tv
+      render('/meishi/admin/videos/iframe_form', :layout => false)
+    else
+      redirect_to edit_admin_video_path(@video)
+    end
   end
 
   # 软删除视频
@@ -113,18 +118,29 @@ class Admin::VideosController < ApplicationController
     end
     redirect_to admin_videos_path    
   end
-  
+
   # 物理删除视频
   def rm
     @video.destroy
     flash[:notice] = "视频已被物理删除"
     redirect_to admin_videos_path 
   end
-  
+
 private
 
   def find_video
     @video = Video.find(params[:id])
+  end
+  
+  # 直接操作meishi的tv模型
+  def modify_meishi_tv
+    tv              = @video.tv
+    tv.name         = @video.title
+    tv.intro        = @video.description
+    tv.state        = @video.state
+    tv.flv_url      = @video.asset.url(:transcoded) if @video.state == "converted"
+    tv.dv_type      = 2 # shadowgraph创建的视频类型。重要！meishi根据这个类型生成视频url。    
+    tv.save    
   end
 
 end
