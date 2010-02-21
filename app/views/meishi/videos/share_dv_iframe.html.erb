@@ -1,0 +1,123 @@
+<!-- 嵌入新建视频表单 开始 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+  <%= stylesheet_link_tag "http://#{request.host_with_port}/stylesheets/uploadify" %>
+<style>
+input[type=text], input.text, input.title, textarea, select {background-color:#fff;border:1px solid #bbb;}
+input[type=text]:focus, input.text:focus, input.title:focus, textarea:focus, select:focus {border-color:#666;}
+input[type=text], input.text, input.title, textarea, select {margin:0.5em 0;}
+input.text, input.title {width:300px;padding:5px;}
+input.title {font-size:1.5em;}
+textarea {width:390px;height:250px;padding:5px;}
+input.span-10{border-left-width:1px!important;border-right-width:1px!important;padding-left:5px!important;padding-right:5px!important;}
+input.span-10, textarea.span-10 {width:378px!important;}
+.item_title span{
+color:#333333;
+font:bold 15px/23px Tahoma,Geneva,sans-serif;
+vertical-align:middle;
+}
+h2.item_title {
+background:url("<%= CONFIG['meishi']['url'] %>/images/share_tv/title_bg.jpg") no-repeat scroll 0 0 transparent;
+color:#666666;
+height:23px;
+padding:3px 0 0 50px;
+width:621px;
+}
+a:link{text-decoration:none; color:#f60;}
+a:visited{text-decoration:none; color:#f60;}
+a:hover{text-decoration:none; color:#fff; background-color:#F07C01;}
+</style>
+
+<%= javascript_include_tag "http://#{request.host_with_port}/javascripts/jquery" %>
+<%= javascript_include_tag "http://#{request.host_with_port}/javascripts/jquery.uploadify.js" %>
+<%= javascript_include_tag "http://#{request.host_with_port}/javascripts/swfobject" %>
+
+<%- session_key_name = ActionController::Base.session_options[:session_key] -%>
+
+<script type="text/javascript">// <![CDATA[
+document.domain="<%= CONFIG['root_domain'] %>";
+$(document).ready(function() {
+  $('#video_asset').uploadify({
+    'uploader'      : '/uploadify/uploadify.swf',
+    'script'        : '/videos',
+    'fileDataName'  : 'video[asset]',    
+    'cancelImg'     : '/uploadify/cancel.png',
+    'scriptData'    : {
+      'eycp' : '<%= u cookies['eycp'] %>',      
+      '<%= session_key_name %>' : '<%= u cookies[session_key_name] %>',
+      'authenticity_token'      : '<%= u form_authenticity_token if protect_against_forgery? %>'
+    },
+    // <%# 上传成功后提交父页面的表单 %>
+    onComplete: function (evt, queueID, fileObj, response, data) {
+      // var v_id = response.match(/id\=(\d+)/)[1];
+      // var title = response.match(/title\=(.*)\s/)[1];
+      // var desc = response.match(/desc\=(.*)/)[1];
+      var url = "<%= CONFIG['meishi']['url'] %>"+"/home/share_dv?upload=success"
+      alert(url);
+      parent.window.location = url;
+      // var url = v_id;
+      // write_parent_video_info(title,desc,url);
+      // submit_parent_video_form();
+    }
+  });
+});
+
+// <%# 上传前附加上视频信息 %>
+function add_video_info(){
+  $('#video_asset').uploadifySettings('scriptData', {
+    'tv[cat_id]' : '36', // 视频分类36－－老饕有约 DV征集
+    'tv[user_id]' : $('#current_user_id', window.parent.document).html(), // 父页面的一个存放视频上传用户在美食的id的元素
+    'video[title]' : $('#video_title').val(),
+    'video[description]' : $('#video_description').val()     
+  }); 
+}
+// ]]>
+</script>
+</head>
+
+<body>
+<h2 class="item_title"><span>新建视频</span></h2>
+<%# TODO 增加前端表单验证 %>
+<% form_for(@video, :html => { :multipart => true }) do |f| %>
+  <%= f.error_messages %>
+  <table>
+    <tr>
+      <td><%= f.label :title,'标题' %>: </td>
+      <td><%= f.text_field :title, :class => 'title span-10' %></td>
+    </tr>
+    <tr>
+      <td><%= f.label :description,'描述' %>: </td>
+      <td><%= f.text_area :description, :class => 'span-10', :rows => 10 %></td>
+    </tr>
+<% if false %>
+    <tr>
+    	<td><%= f.label :tags %>: </td><td><%= f.text_field :tag_list %></td>
+    </tr>
+    <tr>
+      <td><%= f.label :video %>: </td><td><%= f.file_field :uploaded_data %></td>
+    </tr>
+<% end %>    
+    <tr>
+      <td>
+        <%= f.label :video,'视频文件'  %>: </td><td><%= f.file_field :asset %>
+        <a href="javascript:add_video_info();$('#video_asset').uploadifyUpload();">开始上传</a> ｜ 
+        <a href="javascript:$('#video_asset').uploadifyClearQueue();">清除队列</a> ｜ 
+        <%# BUG 取消上传有问题 %>
+        <a href="javascript:$('#video_asset').uploadifyCancel();">取消上传</a>
+      </td>
+    </tr> 
+    <tr>
+      <td>
+      <% if false %>
+        <%= f.submit '提交' %> - 
+      <% end %>
+      </td>
+    </tr>
+  </table>
+<% end %>
+</body>
+</html>
+<!-- 嵌入新建视频表单 结束 -->
