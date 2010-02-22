@@ -1,7 +1,8 @@
 # 视频管理和编码模型
 class Video < ActiveRecord::Base
   
-  named_scope :published, :conditions => {:state => 'published'}
+  named_scope :published, :conditions => {:visibility => 'published'}
+  named_scope :unpublished, :conditions => {:visibility => 'unpublished'}
   named_scope :pending, :conditions => {:state => 'pending'}
   named_scope :audited, :conditions => {:state => 'audited'}
   named_scope :no_encoding, :conditions => {:state => 'no_encoding'}
@@ -27,7 +28,7 @@ class Video < ActiveRecord::Base
   # # paperclip提供的附件管理功能
   has_attached_file :asset,
                     :styles => lambda { |attachment|
-                    if attachment.instance.state == "converting"
+                    if attachment.instance.converting?
                       # 可以在这里扩展视频的recipe 和 profile，作为参数传进去
                       {:transcoded => '500x375'}
                     else # 其它状态只
@@ -44,7 +45,7 @@ class Video < ActiveRecord::Base
                     # :processors => [ :video_encoding ]
                     :processors => lambda { |video|
                       # 新视频状态为padding，进入编码队列的视频状态为queued_up，只有进入编码队列才能用video_encoding编码
-                      if video.state == "converting"
+                      if video.converting?
                         [ :video_encoding ]
                       else
                         [ :video_thumbnail ]
@@ -57,6 +58,10 @@ class Video < ActiveRecord::Base
     # 视频编码完成后将视频状态改变为已编码
     after_transition :to => :queued_up, :do => :encoding #lambda { |video| video.reprocess! }
     after_transition :to => :converted, :do => :set_new_filename
+    after_transition :to => :cancel, :do => lambda{ |video| video.withdraw! }
+    after_transition :to => :soft_deleted, :do => lambda{ |video| video.withdraw! }
+    after_transition :to => :converted, :do => lambda{ |video| video.publish! }
+    after_transition :to => :no_encoding, :do => lambda{ |video| video.publish! }
     
     event :audit       do transition :pending => :audited end
     event :queue       do transition :audited => :queued_up end
@@ -68,7 +73,12 @@ class Video < ActiveRecord::Base
     event :resume      do transition [:error, :canceled, :soft_deleted] => :pending end
     event :cancel      do transition all - :canceled => :canceled end
     event :soft_delete do transition all - :soft_deleted => :soft_deleted end
-    event :publish     do transition [:converted, :no_encoding] => :published end
+    
+  end
+
+  state_machine :visibility, :initial => :unpublished do
+    event :publish   do transition :unpublished => :published end
+    event :withdraw  do transition :published => :unpublished end
   end
 
   # 视频编码信息
@@ -77,6 +87,9 @@ class Video < ActiveRecord::Base
               :audio_codec, :audio_sample_rate
 
   # 用新进程列队编码视频，编码后改变视频状态为已编码
+  # 本方法意图当有视频进入编码队列时，新建一个进程作为编码队列来编码，且只维持一个编码队列。编码队列完成进程退出
+  # TODO 可配置多个编码队列，配置是否进行CPU使用限制
+  # TODO 可配置为后台守候进程来编码
   def encoding
     self.queued_at = Time.now
     if Video.converting.empty? # 如果有视频处于编码中，什么都不做，确保只有一个编码进程

@@ -62,7 +62,7 @@
   <%= f.submit "重新生成缩略图" %> |
   <%= f.submit "手动编码" unless @video.state=="pending" %>
   <%= f.submit "不需编码" %>
-  <% if @video.state == 'soft_deleted' %>
+  <% if @video.soft_deleted? %>
   <%#= link_to("恢复该视频", admin_video_path(@video), :confirm => '恢复该视频?', :method => :put) %>
   <%= f.submit "恢复该视频", :confirm => '恢复该视频?' %>
   <% else %>
@@ -99,7 +99,7 @@
   <hr class="space" />
 </div>
 
-<% if @video.state == "converted" %>
+<% if @video.converted? %>
 <div class = "prepend-1 span-17">
   <h3 class="alt">播放编码后的视频：</h3>
   <%= "进入编码队列于：" + @video.queued_at.to_s(:db) if @video.queued_at %>

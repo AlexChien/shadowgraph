@@ -23,7 +23,7 @@
 
 <div class="prepend-1"> 
 <% 
-  case @video.state  
+  case @video.state
   when "converted"
 %>
   <% url = @video.asset.url(:transcoded) %>

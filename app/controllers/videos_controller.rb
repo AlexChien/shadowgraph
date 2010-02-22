@@ -84,6 +84,7 @@ private
     tv              = Tv.new 
     tv.name         = @video.title
     tv.intro        = @video.description
+    tv.state        = @video.visibility
     tv.flv_url      = @video.asset.url
     tv.dv_type      = 2 # shadowgraph创建的视频类型。重要！meishi根据这个类型生成视频url。
     tv.is_published = 0
