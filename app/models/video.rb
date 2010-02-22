@@ -80,7 +80,7 @@ class Video < ActiveRecord::Base
 
   state_machine :visibility, :initial => :unpublished do
     event :publish   do transition :unpublished => :published end
-    event :withdraw  do transition :published => :unpublished end
+    event :withdraw  do transition all => :unpublished end
   end
 
   # 视频编码信息
@@ -123,8 +123,7 @@ class Video < ActiveRecord::Base
       video.started_encoding_at = begun_at
       video.encoded_at = ended_at
       video.encoding_time = (ended_at - begun_at).to_i
-      video.converted! # 编码结束      
-      video.publish! # 编码结束后才能发布
+      video.converted! # 编码结束
       video.save!  
       encoding # 递归再看看编码时是否有放到队列里的视频
     end #spawn process
