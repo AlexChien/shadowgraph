@@ -66,7 +66,7 @@
   <%#= link_to("恢复该视频", admin_video_path(@video), :confirm => '恢复该视频?', :method => :put) %>
   <%= f.submit "恢复该视频", :confirm => '恢复该视频?' %>
   <% else %>
-  <%= link_to("删除该视频", admin_video_path(@video), :confirm => '删除该视频?', :method => :delete) %>
+  <%= link_to("删除该视频", admin_video_path(@video,:iframe => 'laotao'), :confirm => '删除该视频?', :method => :delete) %>
   <% end %>
   </div>
 <% end %>

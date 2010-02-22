@@ -117,7 +117,11 @@ class Admin::VideosController < ApplicationController
         flash[:error] = "出错，请联系管理员"
       end
     end
-    redirect_to admin_videos_path    
+    if params[:iframe] == "laotao"
+      render('/meishi/admin/videos/iframe_form', :layout => false)
+    else
+      redirect_to admin_videos_path
+    end        
   end
 
   # 物理删除视频
