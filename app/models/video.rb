@@ -56,7 +56,9 @@ class Video < ActiveRecord::Base
   # state machine (see http://github.com/pluginaweek/state_machine/tree/master for details)
   state_machine :initial => :pending do
     # 视频编码完成后将视频状态改变为已编码
-    after_transition :to => :queued_up, :do => :encoding #lambda { |video| video.reprocess! }
+    after_transition :to => :queued_up, :do => lambda { |video| 
+                                                video.queued_at = Time.now
+                                                video.encode! }
     after_transition :to => :converted, :do => :set_new_filename
     after_transition :to => :canceled, :do => lambda{ |video| video.withdraw! }
     after_transition :to => :soft_deleted, :do => lambda{ |video| video.withdraw! }
@@ -90,39 +92,42 @@ class Video < ActiveRecord::Base
   # 本方法意图当有视频进入编码队列时，新建一个进程作为编码队列来编码，且只维持一个编码队列。编码队列完成进程退出
   # TODO 可配置多个编码队列，配置是否进行CPU使用限制
   # TODO 可配置为后台守候进程来编码
-  def encoding
-    self.queued_at = Time.now
+  def encode!
     if Video.converting.empty? # 如果有视频处于编码中，什么都不做，确保只有一个编码进程
       if queued_video = Video.queued_up.first # 从队列里取先入视频编码
-        #spawn a new process to handle conversion
-        # spawn(:nice => 7) do # 1－19，数字越大子进程比父进程优先级越低
-        spawn do
-        # 用thread来处理
-        # spawn(:method => :thread) do        
-          # logger.info(`ps aux | grep ruby`)
-          # logger.info("PID: #{Process.pid}")
-# debugger
-          # 如果是linux系统，设置只用1个cpu编码
-          LinuxScheduler.set_affinity(0) if RUBY_PLATFORM =~ /Linux/
-          queued_video.convert! # 从队列状态变为编码状态
-          begin
-            begun_at = Time.now
-            queued_video.started_encoding_at = begun_at
-            queued_video.asset.reprocess! # 用paperclip processor处理视频编码
-            queued_video.converted! # 编码结束
-            ended_at = Time.now
-            queued_video.encoded_at = ended_at
-            queued_video.encoding_time = (ended_at - begun_at).to_i
-            queued_video.publish! # 编码结束后才能发布
-            queued_video.save!
-          rescue PaperclipError => e
-            flash[:notice] = e
-            queued_video.failure! # 编码出错
-          end
-          encoding # 递归再看看编码时是否有放到队列里的视频
-        end #spawn process
+        start_encode_queue(queued_video)
       end
     end
+  end
+  
+  # spawn a new process to handle conversion
+  # spawn(:nice => 7) do # 1－19，数字越大子进程比父进程优先级越低
+  def start_encode_queue(video)
+    # 用thread来处理
+    # spawn(:method => :thread) do    
+    spawn do     
+      # logger.info(`ps aux | grep ruby`)
+      # logger.info("PID: #{Process.pid}")
+      # debugger
+      # 如果是linux系统，设置只用1个cpu编码
+      LinuxScheduler.set_affinity(0) if RUBY_PLATFORM =~ /Linux/
+      video.convert! # 从队列状态变为编码状态
+      begin
+        begun_at = Time.now
+        video.asset.reprocess! # 用paperclip processor处理视频编码
+        ended_at = Time.now
+      rescue PaperclipError => e
+        flash[:notice] = e
+        video.failure! # 编码出错
+      end        
+      video.started_encoding_at = begun_at
+      video.encoded_at = ended_at
+      video.encoding_time = (ended_at - begun_at).to_i
+      video.converted! # 编码结束      
+      video.publish! # 编码结束后才能发布
+      video.save!  
+      encoding # 递归再看看编码时是否有放到队列里的视频
+    end #spawn process
   end
   
   # 用rvideo判断文件是否为有效视频文件

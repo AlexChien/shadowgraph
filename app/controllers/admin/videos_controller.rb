@@ -84,19 +84,19 @@ class Admin::VideosController < ApplicationController
       @video.fore_encode! # 将状态改为编码中才可使用paperclip的video_encoding processer
       begin
         begun_at = Time.now
-        @video.started_encoding_at = begun_at
         @video.asset.reprocess! # 用paperclip processor处理视频编码
-        @video.converted! # 编码结束
         ended_at = Time.now
-        @video.encoded_at = ended_at
-        @video.publish! # 编码结束后才能发布
-        @video.save!
-        @video.encoding_time = (ended_at - begun_at).to_i
-        flash[:notice] = "视频已手动编码完成"
-      rescue
+      rescue PaperclipError => e
+        flash[:notice] = e
         @video.failure! # 编码出错
-        flash[:notice] = "编码时出错"
       end
+      @video.started_encoding_at = begun_at
+      @video.encoded_at = ended_at
+      @video.encoding_time = (ended_at - begun_at).to_i      
+      @video.converted! # 编码结束      
+      @video.publish! # 编码结束后才能发布
+      @video.save!
+      flash[:notice] = "视频已手动编码完成并发布"
     end
     if params[:iframe] == "laotao"
       modify_meishi_tv
