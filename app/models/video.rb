@@ -79,7 +79,7 @@ class Video < ActiveRecord::Base
   end
 
   state_machine :visibility, :initial => :unpublished do
-    event :publish   do transition :unpublished => :published end
+    event :publish   do transition all => :published end
     event :withdraw  do transition all => :unpublished end
   end
 
