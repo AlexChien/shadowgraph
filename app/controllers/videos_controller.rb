@@ -26,6 +26,7 @@ class VideosController < ApplicationController
   end
 
   def create
+debugger    
     @video = Video.new(params[:video])
     @video.user = @current_user
     # flash上传的二进制流mime type是 application/octet-stream。
