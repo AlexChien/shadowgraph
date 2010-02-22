@@ -58,7 +58,7 @@ class Video < ActiveRecord::Base
     # 视频编码完成后将视频状态改变为已编码
     after_transition :to => :queued_up, :do => :encoding #lambda { |video| video.reprocess! }
     after_transition :to => :converted, :do => :set_new_filename
-    after_transition :to => :cancel, :do => lambda{ |video| video.withdraw! }
+    after_transition :to => :canceled, :do => lambda{ |video| video.withdraw! }
     after_transition :to => :soft_deleted, :do => lambda{ |video| video.withdraw! }
     after_transition :to => :converted, :do => lambda{ |video| video.publish! }
     after_transition :to => :no_encoding, :do => lambda{ |video| video.publish! }
