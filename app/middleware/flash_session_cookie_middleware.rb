@@ -8,8 +8,7 @@ class FlashSessionCookieMiddleware
   end
 
   def call(env)
-    if env['HTTP_USER_AGENT'] =~ /^(Adobe|Shockwave) Flash/
-debugger      
+    if env['HTTP_USER_AGENT'] =~ /^(Adobe|Shockwave) Flash/     
       # params = ::Rack::Utils.parse_query(env['QUERY_STRING']) #老版本的rack
       params = Rack::Request.new(env).params
       unless params['eycp'].nil?

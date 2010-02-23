@@ -79,6 +79,8 @@ class Video < ActiveRecord::Base
   end
 
   state_machine :visibility, :initial => :unpublished do
+    after_transition :to => :published, :do => :change_tv_visibility
+    after_transition :to => :unpublished, :do => :change_tv_visibility
     event :publish   do transition all => :published end
     event :withdraw  do transition all => :unpublished end
   end
@@ -194,6 +196,10 @@ protected
     current_format = File.extname(path)
     basename       = File.basename(path, current_format)   
     update_attribute(:filename, basename)
+  end
+  
+  def change_tv_visibility
+    t.state = self.visibility if t = self.tv 
   end
 
 end

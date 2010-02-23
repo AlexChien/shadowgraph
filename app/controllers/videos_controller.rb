@@ -25,8 +25,7 @@ class VideosController < ApplicationController
     render('/meishi/videos/share_dv_iframe', :layout => false) if params[:iframe] == "share_dv"
   end
 
-  def create
-debugger    
+  def create   
     @video = Video.new(params[:video])
     @video.user = @current_user
     # flash上传的二进制流mime type是 application/octet-stream。
