@@ -5,7 +5,7 @@
 </div>
 <div class="span-7">
   <span><%= t("title") %>:</span>
-  <%= link_to truncate(video.title,26), edit_admin_video_url(video) %><br />
+  <%= link_to truncate(video.title, :length=>26), edit_admin_video_url(video) %><br />
   <span><%= t("uploader") %>:</span> <%= link_to video.user.login, user_path(video.user) %>
 </div>
 <div class="span-3">

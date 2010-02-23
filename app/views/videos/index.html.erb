@@ -12,7 +12,7 @@
                 video_path(video) %>
     <br />
     <b>
-    <%= link_to truncate(video.title, 28), video_path(video), :class => "video_title" %>
+    <%= link_to truncate(video.title, :length=>28), video_path(video), :class => "video_title" %>
     </b>                
   </div>
   <div class="prepend-1 alt">
