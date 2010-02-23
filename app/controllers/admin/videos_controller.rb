@@ -97,9 +97,13 @@ class Admin::VideosController < ApplicationController
       @video.save!
       flash[:notice] = "视频已手动编码完成并发布"
     end
-    if params[:iframe] == "laotao"
+    if @video.tv
       modify_meishi_tv
-      render('/meishi/admin/videos/iframe_form', :layout => false)
+      if params[:iframe] == "laotao"
+        render('/meishi/admin/videos/iframe_form', :layout => false)  
+      else
+        redirect_to edit_admin_video_path(@video)
+      end
     else
       redirect_to edit_admin_video_path(@video)
     end
