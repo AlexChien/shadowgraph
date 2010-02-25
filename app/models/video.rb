@@ -202,6 +202,7 @@ protected
   def change_tv_visibility
     if t = self.tv 
       t.state = self.visibility
+      t.save
     end
   end
 
