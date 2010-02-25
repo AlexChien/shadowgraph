@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20100205061720) do
+ActiveRecord::Schema.define(:version => 20100222014316) do
 
   create_table "open_id_authentication_associations", :force => true do |t|
     t.integer "issued"
@@ -127,6 +127,7 @@ ActiveRecord::Schema.define(:version => 20100205061720) do
     t.datetime "started_encoding_at"
     t.time     "encoding_time"
     t.datetime "encoded_at"
+    t.string   "visibility"
   end
 
 end

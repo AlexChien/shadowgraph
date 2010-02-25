@@ -28,12 +28,13 @@ class Video < ActiveRecord::Base
   # # paperclip提供的附件管理功能
   has_attached_file :asset,
                     :styles => lambda { |attachment|
-                    if attachment.instance.converting?
+                    if attachment.instance.converting? # 视频编码时可传入参数
                       # 可以在这里扩展视频的recipe 和 profile，作为参数传进去
-                      {:transcoded => '500x375'}
-                    else # 其它状态只
+                      {:transcoded => '500x376', 
+                       :watermark_path => RAILS_ROOT + '/public/images/video_watermark_logo.png'}
+                    else # 其它状态只传尺寸来截图
                       {:tiny => '78x59#', :small => '156x117#',
-                        :medium => '328x246#', :large => '500x375#'}
+                        :medium => '328x246#', :large => '500x376#'}
                     end
                     },
                     :url => '/:class/:id/:style.:content_type_extension',
