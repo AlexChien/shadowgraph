@@ -107,8 +107,8 @@ class Video < ActiveRecord::Base
   # spawn(:nice => 7) do # 1－19，数字越大子进程比父进程优先级越低
   def start_encode_queue(video)
     # 用thread来处理
-    # spawn(:method => :thread) do    
-    spawn do     
+    spawn(:method => :thread) do    
+    # spawn do     
       # logger.info(`ps aux | grep ruby`)
       # logger.info("PID: #{Process.pid}")
       # debugger
