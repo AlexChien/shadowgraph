@@ -77,7 +77,7 @@ namespace :deploy do
   end 
 
   desc "Generate database.yml and Create asset packages for production, minify and compress js and css files" 
-  after "update_code", :roles => [:web] do
+  after "deploy:update_code", :roles => [:web] do
     database_yml
     thin_yml
     app_config
@@ -85,7 +85,7 @@ namespace :deploy do
   
   # add soft link script for deploy
   desc "Symlink the upload directories"
-  after "symlink", :roles => [:web] do
+  after "deploy:symlink", :roles => [:web] do
     ## create link for shared assets
     # run "#{shared_path}/script/relink.sh /usr/local/webservice/htdocs/assets #{release_path}/assets #{previous_release} #{release_name} assets"
     run "ln -s /usr/local/webservice/htdocs/assets #{release_path}/assets"
