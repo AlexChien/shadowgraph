@@ -200,8 +200,8 @@ protected
   
   def change_tv_visibility
     if t = self.tv
-      t.flv_url = self.asset.path(:transcoded).gsub(RAILS_ROOT,'') if self.converted?
-      t.flv_url = self.asset.path.gsub(RAILS_ROOT,'') if self.no_encoding?
+      t.flv_url = self.asset.url(:transcoded).gsub(/\?\d*$/,'') if self.converted?
+      t.flv_url = self.asset.url.gsub(/\?\d*$/,'') if self.no_encoding?
       t.state = self.visibility
       t.save
     end
