@@ -146,8 +146,8 @@ private
     tv              = @video.tv
     tv.name         = @video.title
     tv.intro        = @video.description
-    tv.flv_url      = @video.asset.url(:transcoded) if @video.converted?
-    tv.flv_url      = @video.asset.url(:transcoded) if @video.no_encoding?
+    tv.flv_url      = @video.asset.path(:transcoded).gsub(RAILS_ROOT,'') if @video.converted?
+    tv.flv_url      = @video.asset.path.gsub(RAILS_ROOT,'') if @video.no_encoding?
     tv.dv_type      = 2 # shadowgraph创建的视频类型。重要！meishi根据这个类型生成视频url。    
     tv.save    
   end
