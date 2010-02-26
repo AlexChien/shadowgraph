@@ -55,7 +55,7 @@ module Paperclip
       # recipe += "-s $resolution$ " # 尺寸 宽x高 $resolution$
       recipe += "-s 500x376 " # 尺寸 宽x高 $resolution$
       # recipe += @watermark if @watermark # 加水印
-      recipe += "-sameq -vhook '/usr/local/lib/vhook/watermark.so -f #{RAILS_ROOT}/public/images/video_watermark_logo.png -m 1' "# 加水印
+      recipe += "-sameq -vhook '/usr/local/lib/vhook/watermark.so -f #{RAILS_ROOT}/public/images/video_watermark_logo.png -m 1 -t e0e0e0' "# 加水印
       recipe += "-y $output_file$ " # 输出文件路径      
       recipe += "\nflvtool2 -U $output_file$"
       begin
