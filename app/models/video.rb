@@ -61,10 +61,10 @@ class Video < ActiveRecord::Base
                                                 video.queued_at = Time.now
                                                 video.encode! }
     after_transition :to => :converted, :do => :set_new_filename
-    after_transition :to => :canceled, :do => lambda{ |video| video.withdraw! }
-    after_transition :to => :soft_deleted, :do => lambda{ |video| video.withdraw! }
-    after_transition :to => :converted, :do => lambda{ |video| video.publish! }
-    after_transition :to => :no_encoding, :do => lambda{ |video| video.publish! }
+    after_transition :to => :canceled, :do => lambda { |video| video.withdraw! }
+    after_transition :to => :soft_deleted, :do => lambda { |video| video.withdraw! }
+    after_transition :to => :converted, :do => lambda { |video| video.publish! }
+    after_transition :to => :no_encoding, :do => lambda { |video| video.publish! }
     
     event :audit       do transition :pending => :audited end
     event :queue       do transition :audited => :queued_up end
@@ -76,7 +76,6 @@ class Video < ActiveRecord::Base
     event :resume      do transition [:error, :canceled, :soft_deleted] => :pending end
     event :cancel      do transition all - :canceled => :canceled end
     event :soft_delete do transition all - :soft_deleted => :soft_deleted end
-    
   end
 
   state_machine :visibility, :initial => :unpublished do
@@ -200,7 +199,9 @@ protected
   end
   
   def change_tv_visibility
-    if t = self.tv 
+    if t = self.tv
+      t.flv_url = self.asset.path(:transcoded).gsub(RAILS_ROOT,'') if self.converted?
+      t.flv_url = self.asset.path.gsub(RAILS_ROOT,'') if self.no_encoding?
       t.state = self.visibility
       t.save
     end
