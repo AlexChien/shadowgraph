@@ -58,6 +58,9 @@ module Paperclip
       recipe += "-sameq -vhook '/usr/local/lib/vhook/watermark.so -f #{RAILS_ROOT}/public/images/video_watermark_logo.png -m 1 -t e0e0e0' " unless Rails.env.development? # 加水印(mac上开发难以安装旧版FFMPEG来调用这个水印库)
       recipe += "-y $output_file$ " # 输出文件路径      
       recipe += "\nflvtool2 -U $output_file$"
+      Rails.logger.info(recipe)
+      Rails.logger.info(input_file_path)
+      Rails.logger.info(output_file_path)
       begin
 # debugger
         # transcoder.execute(recipe, {:input_file => input_file_path,
@@ -65,7 +68,8 @@ module Paperclip
         #                             :resolution => "500x376"})
         transcoder.execute(recipe, {:input_file => input_file_path,
                                     :output_file => output_file_path})
-      rescue
+      rescue => e
+        Rails.logger.error("!!!!!!!!! #{e} !!!!!!!!! Video ID:#{@file.path} @ #{Time.now}")
         raise  "There was an error encoding the flv for #{@basename}" if whiny
       end
       dst
