@@ -94,6 +94,7 @@ class Admin::VideosController < ApplicationController
         flash[:notice] = "视频已手动编码完成并发布"
       rescue  => e
         # flash[:notice] = e
+        Rails.logger.error("!!!!!!!!! #{e} !!!!!!!!! Video ID:#{@video.id} @ #{Time.now}")
         @video.failure! # 编码出错
       end
     end
