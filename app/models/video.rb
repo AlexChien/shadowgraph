@@ -15,6 +15,12 @@ class Video < ActiveRecord::Base
   named_scope :being, lambda { |state|
     { :conditions => { :state => state } }
   }
+  named_scope :desc_by, lambda { |column|
+    { :order => "#{column} DESC" }
+  }
+  named_scope :asc_by, lambda { |column|
+    { :order => "#{column} ASC" }
+  }
   
   # acl9插件object模型
   acts_as_authorization_object
@@ -59,6 +65,7 @@ class Video < ActiveRecord::Base
     # 视频编码完成后将视频状态改变为已编码
     after_transition :to => :queued_up, :do => lambda { |video| 
                                                 video.queued_at = Time.now
+                                                video.save!
                                                 video.encode! }
     after_transition :to => :converted, :do => :set_new_filename
     after_transition :to => :canceled, :do => lambda { |video| video.withdraw! }
@@ -71,7 +78,7 @@ class Video < ActiveRecord::Base
     event :no_encode   do transition all - :pending => :no_encoding end
     event :convert     do transition :queued_up => :converting end
     event :fore_encode do transition all - :pending =>  :converting end
-    event :converted   do transition :converting => :converted end
+    event :finish      do transition :converting => :converted end
     event :failure     do transition :converting => :error end
     event :resume      do transition [:error, :canceled, :soft_deleted] => :pending end
     event :cancel      do transition all - :canceled => :canceled end
@@ -96,7 +103,7 @@ class Video < ActiveRecord::Base
   # TODO 可配置为后台守候进程来编码
   def encode!
     if Video.converting.empty? # 如果有视频处于编码中，什么都不做，确保只有一个编码进程
-      if queued_video = Video.queued_up.first # 从队列里取先入视频编码
+      if queued_video = Video.queued_up.asc_by('queued_at').first # 从队列里取先入视频编码
         start_encode_queue(queued_video)
       end
     end
@@ -115,19 +122,21 @@ class Video < ActiveRecord::Base
       LinuxScheduler.set_affinity(0) if RUBY_PLATFORM =~ /Linux/
       video.convert! # 从队列状态变为编码状态
       begin
-        begun_at = Time.now
+        @begun_at = Time.now
         video.asset.reprocess! # 用paperclip processor处理视频编码
-        ended_at = Time.now
-      rescue PaperclipError => e
-        flash[:notice] = e
+        @ended_at = Time.now
+        video.started_encoding_at = @begun_at
+        video.encoded_at = @ended_at
+        video.encoding_time = (@ended_at - @begun_at).to_i
+        # video.finish! # 编码结束
+        video.state="converted" # 编码结束
+        video.save!
+      rescue => e
+        # flash[:notice] = e
+        Rails.logger.error("!!!!!!!!! #{e} !!!!!!!!! Video ID:#{@video.id} @ #{Time.now}")
         video.failure! # 编码出错
       end        
-      video.started_encoding_at = begun_at
-      video.encoded_at = ended_at
-      video.encoding_time = (ended_at - begun_at).to_i
-      video.converted! # 编码结束
-      video.save!  
-      encoding # 递归再看看编码时是否有放到队列里的视频
+      encode! # 递归再看看编码时是否有放到队列里的视频
     end #spawn process
   end
   
