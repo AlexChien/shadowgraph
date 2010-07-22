@@ -93,6 +93,7 @@ private
     tv.user_id      = params[:tv][:user_id]
     tv.article_category_id = params[:tv][:cat_id] if params[:tv][:cat_id]
     tv.save
+    tv.located_in_all_city!
     return tv.id
   end
 

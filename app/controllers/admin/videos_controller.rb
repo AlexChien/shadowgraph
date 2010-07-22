@@ -150,7 +150,6 @@ private
     tv.intro        = @video.description
     tv.dv_type      = 2 # shadowgraph创建的视频类型。重要！meishi根据这个类型生成视频url。
     tv.save
-    tv.located_in_all_city!
   end
 
 end
