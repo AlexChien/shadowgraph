@@ -127,7 +127,7 @@ class Video < ActiveRecord::Base
         @ended_at = Time.now
         video.started_encoding_at = @begun_at
         video.encoded_at = @ended_at
-        video.encoding_time = (@ended_at - @begun_at).to_i
+        video.encoding_time = (@ended_at - @begun_at).to_s
         # video.finish! # 编码结束
         video.state="converted" # 编码结束
         video.publish!
