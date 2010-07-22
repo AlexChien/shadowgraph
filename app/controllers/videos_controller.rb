@@ -82,7 +82,7 @@ private
   
   # 直接操作meishi的tv模型
   def create_meishi_tv
-    tv              = Mieshi::Tv.new
+    tv              = Meishi::Tv.new
     tv.name         = @video.title
     tv.intro        = @video.description
     tv.state        = @video.visibility
