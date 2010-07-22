@@ -90,6 +90,7 @@ class Admin::VideosController < ApplicationController
         @video.encoded_at = ended_at
         @video.encoding_time = (ended_at - begun_at).to_i
         @video.finish! # 编码结束
+        @video.publish!
         @video.save!
         flash[:notice] = "视频已手动编码完成并发布"
       rescue  => e
@@ -147,8 +148,9 @@ private
     tv              = @video.tv
     tv.name         = @video.title
     tv.intro        = @video.description
-    tv.dv_type      = 2 # shadowgraph创建的视频类型。重要！meishi根据这个类型生成视频url。    
-    tv.save    
+    tv.dv_type      = 2 # shadowgraph创建的视频类型。重要！meishi根据这个类型生成视频url。
+    tv.save
+    tv.located_in_all_city!
   end
 
 end

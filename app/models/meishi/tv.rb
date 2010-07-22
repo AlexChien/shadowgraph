@@ -1,15 +1,8 @@
 # 调用meishi tv模型
-class Tv < ActiveRecord::Base
+class Meishi::Tv < Meishi::Base
 
-  establish_connection( 
-  :adapter  => CONFIG['meishi']["adapter"], 
-  :host     => CONFIG['meishi']["host"], 
-  :encoding => CONFIG['meishi']["encoding"], 
-  :database => CONFIG['meishi']["database"], 
-  :username => CONFIG['meishi']["username"], 
-  :password => CONFIG['meishi']["password"]) 
 
-  # set_table_name 'tvs'
+  set_table_name 'tvs'
   # set_primary_key "id"
   
   belongs_to :video
@@ -29,5 +22,12 @@ class Tv < ActiveRecord::Base
   #   event :cancel      do transition all - :canceled => :canceled end
   #   event :soft_delete do transition all - :soft_deleted => :soft_deleted end
   # end
+  
+  def located_in_all_city!
+    Meishi::Coordinate.create(:location_pseud_id => "all",
+                              :location_type     => "City",
+                              :locatee_type      => "Tv",
+                              :locatee_id        => self.id)
+  end
 
 end

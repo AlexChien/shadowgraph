@@ -27,7 +27,7 @@ class Video < ActiveRecord::Base
   
   acts_as_taggable
 
-  has_one :tv
+  has_one :tv, :class_name => 'Meishi::Tv'
   has_many :replies, :class_name => 'VideoReply'
   belongs_to :user
 
@@ -130,6 +130,7 @@ class Video < ActiveRecord::Base
         video.encoding_time = (@ended_at - @begun_at).to_i
         # video.finish! # 编码结束
         video.state="converted" # 编码结束
+        video.publish!
         video.save!
       rescue => e
         # flash[:notice] = e
