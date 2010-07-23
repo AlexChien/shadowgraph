@@ -50,10 +50,12 @@ module Paperclip
       recipe += "-ar 22050 " 
       recipe += "-ab 48000 " # 音频码率 $audio_bitrate$
       recipe += "-f flv " # 视频格式
-      recipe += "-b 300000 " # 视频码率 $video_bitrate_in_bits$
+      # recipe += "-b 300000 " # 视频码率 $video_bitrate_in_bits$
+      recipe += "-b 50000 " # 视频码率 $video_bitrate_in_bits$
       recipe += "-r 24 " # 帧速率 $fps$
       # recipe += "-s $resolution$ " # 尺寸 宽x高 $resolution$
-      recipe += "-s 500x376 " # 尺寸 宽x高 $resolution$
+      # recipe += "-s 500x376 " # 尺寸 宽x高 $resolution$
+      recipe += "-s 320x240 " # 尺寸 宽x高 $resolution$ #SD
       # recipe += @watermark if @watermark # 加水印
       recipe += "-sameq -vhook '/usr/local/lib/vhook/watermark.so -f #{RAILS_ROOT}/public/images/video_watermark_logo.png -m 1 -t e0e0e0' " unless Rails.env.development? # 加水印(mac上开发难以安装旧版FFMPEG来调用这个水印库)
       recipe += "-y $output_file$ " # 输出文件路径      
