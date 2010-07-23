@@ -98,6 +98,12 @@ class Admin::VideosController < ApplicationController
         Rails.logger.error("!!!!!!!!! #{e} !!!!!!!!! Video ID:#{@video.id} @ #{Time.now}")
         @video.failure! # 编码出错
       end
+     when "疏通队列"
+       @video.finish! # 编码结束
+       @video.publish!
+       @video.encode!
+       flash[:notice] = "请检查视频是否正确编码"
+     else
     end
     if @video.tv
       modify_meishi_tv

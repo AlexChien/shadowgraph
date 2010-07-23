@@ -79,7 +79,7 @@ class Video < ActiveRecord::Base
     event :convert     do transition :queued_up => :converting end
     event :fore_encode do transition all - :pending =>  :converting end
     event :finish      do transition :converting => :converted end
-    event :failure     do transition :converting => :error end
+    event :failure     do transition all => :error end
     event :resume      do transition [:error, :canceled, :soft_deleted] => :pending end
     event :cancel      do transition all - :canceled => :canceled end
     event :soft_delete do transition all - :soft_deleted => :soft_deleted end
@@ -127,11 +127,11 @@ class Video < ActiveRecord::Base
         @ended_at = Time.now
         video.started_encoding_at = @begun_at
         video.encoded_at = @ended_at
-        video.encoding_time = (@ended_at - @begun_at).to_s
+        video.encoding_time = (@ended_at - @begun_at).to_i.to_s
         # video.finish! # 编码结束
         video.state="converted" # 编码结束
         video.publish!
-        video.save!
+        video.save
       rescue => e
         # flash[:notice] = e
         Rails.logger.error("!!!!!!!!! #{e} !!!!!!!!! Video ID:#{@video.id} @ #{Time.now}")
