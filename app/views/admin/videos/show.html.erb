@@ -43,11 +43,11 @@
   <%= "结束编码于：" + @video.encoded_at.to_s(:db) if @video.encoded_at %>
   <br />
   <% if time = @video.encoding_time %>
-  完成编码总用： 
+  完成编码总用时： 
   <%#= "#{time.hour}小时" unless time.hour == 0 %>
   <%#= "#{time.min}分" unless time.min == 0 %>
   <%#= "#{time.sec}秒" %>
-  <%= "#{time}秒" %>
+  <%= time.string_to_time %>
   <% end %>
   编码后视频：
   <% url = @video.asset.url(:transcoded) %>
