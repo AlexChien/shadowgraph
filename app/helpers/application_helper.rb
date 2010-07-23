@@ -17,11 +17,14 @@ module ApplicationHelper
       "你的本地头像管理方案"
     end
   end
-  
-  # "7683".string_to_time #=> "02:08:03"
+
+end
+
+
+# "7683".string_to_time #=> "02:08:03"
+class String
   def string_to_time
     time = self.to_i
     [time/3600, time/60 % 60, time % 60].map {|t| t.to_s.rjust(2, '0')}.join(':')
   end
-
 end
