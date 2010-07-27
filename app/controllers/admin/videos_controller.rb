@@ -42,6 +42,8 @@ class Admin::VideosController < ApplicationController
 
   def edit
     @video.meta_info
+    result = %x[ps aux | grep ffmpeg]
+    @enconding_state = result.include?('paperclip-reprocess')
     render('/meishi/admin/videos/iframe_form', :layout => false) if params[:iframe] == "laotao"
   end
 
