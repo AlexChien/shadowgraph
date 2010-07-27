@@ -2,7 +2,7 @@
 class Meishi::Tv < Meishi::Base
 
 
-  set_table_name 'tvs'
+  set_table_name 'enjoyoung_production.tvs'
   # set_primary_key "id"
   
   belongs_to :video

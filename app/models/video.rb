@@ -1,3 +1,17 @@
+module ActiveRecord
+  class Base
+
+    class << self
+      alias :old_connection :connection
+      def connection
+        self.verify_active_connections!
+        old_connection
+      end
+    end
+
+  end
+end
+
 # 视频管理和编码模型
 class Video < ActiveRecord::Base
   
@@ -125,18 +139,19 @@ class Video < ActiveRecord::Base
         @begun_at = Time.now
         video.asset.reprocess! # 用paperclip processor处理视频编码
         @ended_at = Time.now
-        video.started_encoding_at = @begun_at
-        video.encoded_at = @ended_at
-        video.encoding_time = (@ended_at - @begun_at).to_i.to_s
-        # video.finish! # 编码结束
-        video.state="converted" # 编码结束
-        video.publish!
-        video.save
       rescue => e
         # flash[:notice] = e
         Rails.logger.error("!!!!!!!!! #{e} !!!!!!!!! Video ID:#{@video.id} @ #{Time.now}")
         video.failure! # 编码出错
-      end        
+      end
+      video.started_encoding_at = @begun_at.to_s(:db)
+      video.encoded_at = @ended_at.to_s(:db)
+      video.encoding_time = (@ended_at - @begun_at).to_i.to_s
+      video.save
+      video.finish! # 编码结束
+      # video.state="converted" # 编码结束
+      video.publish!
+      sleep 10 # 防止状态没有及时更新导致同一视频再次编码
       encode! # 递归再看看编码时是否有放到队列里的视频
     end #spawn process
   end
@@ -210,6 +225,7 @@ protected
   
   def change_tv_visibility
     if t = self.tv
+    # if t = Meishi::Tv.find_by_sql("select * from `enjoyoung_production`.tvs where video_id=#{self.id}").first
       t.flv_url = self.asset.url(:transcoded).gsub(/\?\d*$/,'') if self.converted?
       t.flv_url = self.asset.url.gsub(/\?\d*$/,'') if self.no_encoding?
       t.state = self.visibility
