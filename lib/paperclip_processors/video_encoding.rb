@@ -51,7 +51,7 @@ module Paperclip
       # recipe += "-ab 48 " # 音频码率 $audio_bitrate$
       recipe += "-ab 48000 " # 音频码率 $audio_bitrate$
       recipe += "-f flv " # 视频格式
-      recipe += "-b 300000 " # 视频码率 $video_bitrate_in_bits$
+      recipe += "-b 500000 " # 视频码率 $video_bitrate_in_bits$
       # recipe += "-b 300 " # 视频码率 $video_bitrate_in_bits$
       recipe += "-r 24 " # 帧速率 $fps$
       # recipe += "-s $resolution$ " # 尺寸 宽x高 $resolution$
