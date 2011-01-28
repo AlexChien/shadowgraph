@@ -63,11 +63,15 @@ class VideosController < ApplicationController
     path = video.asset.path(params[:style])
     head(:bad_request) and return unless File.exist?(path) && params[:format].to_s == File.extname(path).gsub(/^\.+/, '')
 
+    # cache-control
+    # head(:cache_control => "max-age=604800")
+    # response.headers["Cache-Control"] = "max-age=604800"
+    
     send_file_options = { :type => File.mime_type?(path) }
 
     case SEND_FILE_METHOD
     when 'apache' then send_file_options[:x_sendfile] = true
-    when 'nginx' then head(:x_accel_redirect => path.gsub(Rails.root, ''), :content_type => send_file_options[:type]) and return
+    when 'nginx' then head(:x_accel_redirect => path.gsub(Rails.root, ''), :content_type => send_file_options[:type], :cache_control => "max-age=604800") and return
     end
 
     send_file(path, send_file_options)
