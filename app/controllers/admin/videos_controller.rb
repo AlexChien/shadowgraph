@@ -42,6 +42,8 @@ class Admin::VideosController < ApplicationController
 
   def edit
     @video.meta_info
+    result = %x[ps aux | grep ffmpeg]
+    @enconding_state = result.include?('paperclip-reprocess')
     render('/meishi/admin/videos/iframe_form', :layout => false) if params[:iframe] == "laotao"
   end
 
@@ -86,16 +88,24 @@ class Admin::VideosController < ApplicationController
         begun_at = Time.now
         @video.asset.reprocess! # 用paperclip processor处理视频编码
         ended_at = Time.now
-      rescue PaperclipError => e
-        flash[:notice] = e
+        @video.started_encoding_at = begun_at
+        @video.encoded_at = ended_at
+        @video.encoding_time = (ended_at - begun_at).to_i
+        @video.finish! # 编码结束
+        @video.publish!
+        @video.save!
+        flash[:notice] = "视频已手动编码完成并发布"
+      rescue  => e
+        # flash[:notice] = e
+        Rails.logger.error("!!!!!!!!! #{e} !!!!!!!!! Video ID:#{@video.id} @ #{Time.now}")
         @video.failure! # 编码出错
       end
-      @video.started_encoding_at = begun_at
-      @video.encoded_at = ended_at
-      @video.encoding_time = (ended_at - begun_at).to_i      
-      @video.converted! # 编码结束
-      @video.save!
-      flash[:notice] = "视频已手动编码完成并发布"
+     when "疏通队列"
+       @video.finish! # 编码结束
+       @video.publish!
+       @video.encode!
+       flash[:notice] = "请检查视频是否正确编码"
+     else
     end
     if @video.tv
       modify_meishi_tv
@@ -146,8 +156,8 @@ private
     tv              = @video.tv
     tv.name         = @video.title
     tv.intro        = @video.description
-    tv.dv_type      = 2 # shadowgraph创建的视频类型。重要！meishi根据这个类型生成视频url。    
-    tv.save    
+    tv.dv_type      = 2 # shadowgraph创建的视频类型。重要！meishi根据这个类型生成视频url。
+    tv.save
   end
 
 end

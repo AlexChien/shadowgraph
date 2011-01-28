@@ -23,6 +23,7 @@ class VideosController < ApplicationController
     @video = Video.new
     render('/meishi/videos/new_iframe', :layout => false) if params[:iframe] == "true"
     render('/meishi/videos/share_dv_iframe', :layout => false) if params[:iframe] == "share_dv"
+    render('/meishi/videos/new_for_admin_iframe', :layout => false) if params[:iframe] == "for_admin"
   end
 
   def create   
@@ -33,10 +34,10 @@ class VideosController < ApplicationController
     # @video.asset_content_type = MIME::Types.type_for(@video.asset.original_filename).to_s
     @video.asset_content_type = File.mime_type?(@video.asset.original_filename)
     if @video.save
-      create_meishi_tv if params[:tv] # 直接操作meishi的tv模型
+      tv_id = create_meishi_tv if params[:tv] # 直接操作meishi的tv模型
       if request.env['HTTP_USER_AGENT'] =~ /^(Adobe|Shockwave) Flash/
         # head(:ok, :id => @video.id) and return
-        render :text => "id=#{@video.id} title=#{@video.title} desc=#{@video.description}"
+        render :text => "id=#{@video.id} title=#{@video.title} desc=#{@video.description} tv_id=#{tv_id}"
       else
         # @video.convert
         flash[:notice] = '视频文件已成功上传'
@@ -85,7 +86,7 @@ private
   
   # 直接操作meishi的tv模型
   def create_meishi_tv
-    tv              = Tv.new 
+    tv              = Meishi::Tv.new
     tv.name         = @video.title
     tv.intro        = @video.description
     tv.state        = @video.visibility
@@ -94,8 +95,10 @@ private
     tv.dv_type      = 2 # shadowgraph创建的视频类型。重要！meishi根据这个类型生成视频url。
     tv.is_published = 0
     tv.user_id      = params[:tv][:user_id]
-    tv.article_category_id = params[:tv][:cat_id]       
-    tv.save    
+    tv.article_category_id = params[:tv][:cat_id] if params[:tv][:cat_id]
+    tv.save
+    tv.located_in_all_city!
+    return tv.id
   end
 
 end

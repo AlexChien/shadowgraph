@@ -1,3 +1,17 @@
+module ActiveRecord
+  class Base
+
+    class << self
+      alias :old_connection :connection
+      def connection
+        self.verify_active_connections!
+        old_connection
+      end
+    end
+
+  end
+end
+
 # 视频管理和编码模型
 class Video < ActiveRecord::Base
   
@@ -15,13 +29,19 @@ class Video < ActiveRecord::Base
   named_scope :being, lambda { |state|
     { :conditions => { :state => state } }
   }
+  named_scope :desc_by, lambda { |column|
+    { :order => "#{column} DESC" }
+  }
+  named_scope :asc_by, lambda { |column|
+    { :order => "#{column} ASC" }
+  }
   
   # acl9插件object模型
   acts_as_authorization_object
   
   acts_as_taggable
 
-  has_one :tv
+  has_one :tv, :class_name => 'Meishi::Tv'
   has_many :replies, :class_name => 'VideoReply'
   belongs_to :user
 
@@ -59,6 +79,7 @@ class Video < ActiveRecord::Base
     # 视频编码完成后将视频状态改变为已编码
     after_transition :to => :queued_up, :do => lambda { |video| 
                                                 video.queued_at = Time.now
+                                                video.save!
                                                 video.encode! }
     after_transition :to => :converted, :do => :set_new_filename
     after_transition :to => :canceled, :do => lambda { |video| video.withdraw! }
@@ -71,8 +92,8 @@ class Video < ActiveRecord::Base
     event :no_encode   do transition all - :pending => :no_encoding end
     event :convert     do transition :queued_up => :converting end
     event :fore_encode do transition all - :pending =>  :converting end
-    event :converted   do transition :converting => :converted end
-    event :failure     do transition :converting => :error end
+    event :finish      do transition :converting => :converted end
+    event :failure     do transition all => :error end
     event :resume      do transition [:error, :canceled, :soft_deleted] => :pending end
     event :cancel      do transition all - :canceled => :canceled end
     event :soft_delete do transition all - :soft_deleted => :soft_deleted end
@@ -96,7 +117,7 @@ class Video < ActiveRecord::Base
   # TODO 可配置为后台守候进程来编码
   def encode!
     if Video.converting.empty? # 如果有视频处于编码中，什么都不做，确保只有一个编码进程
-      if queued_video = Video.queued_up.first # 从队列里取先入视频编码
+      if queued_video = Video.queued_up.asc_by('queued_at').first # 从队列里取先入视频编码
         start_encode_queue(queued_video)
       end
     end
@@ -106,28 +127,32 @@ class Video < ActiveRecord::Base
   # spawn(:nice => 7) do # 1－19，数字越大子进程比父进程优先级越低
   def start_encode_queue(video)
     # 用thread来处理
-    spawn(:method => :thread) do    
-    # spawn do     
-      # logger.info(`ps aux | grep ruby`)
-      # logger.info("PID: #{Process.pid}")
+    # spawn(:method => :thread) do
+    spawn do
+      logger.info(`ps aux | grep ruby`)
+      logger.info("PID: #{Process.pid}")
       # debugger
       # 如果是linux系统，设置只用1个cpu编码
       LinuxScheduler.set_affinity(0) if RUBY_PLATFORM =~ /Linux/
       video.convert! # 从队列状态变为编码状态
       begin
-        begun_at = Time.now
+        @begun_at = Time.now
         video.asset.reprocess! # 用paperclip processor处理视频编码
-        ended_at = Time.now
-      rescue PaperclipError => e
-        flash[:notice] = e
+        @ended_at = Time.now
+      rescue => e
+        # flash[:notice] = e
+        Rails.logger.error("!!!!!!!!! #{e} !!!!!!!!! Video ID:#{@video.id} @ #{Time.now}")
         video.failure! # 编码出错
-      end        
-      video.started_encoding_at = begun_at
-      video.encoded_at = ended_at
-      video.encoding_time = (ended_at - begun_at).to_i
-      video.converted! # 编码结束
-      video.save!  
-      encoding # 递归再看看编码时是否有放到队列里的视频
+      end
+      video.started_encoding_at = @begun_at.to_s(:db)
+      video.encoded_at = @ended_at.to_s(:db)
+      video.encoding_time = (@ended_at - @begun_at).to_i.to_s
+      video.save
+      video.finish! # 编码结束
+      # video.state="converted" # 编码结束
+      video.publish!
+      sleep 10 # 防止状态没有及时更新导致同一视频再次编码
+      encode! # 递归再看看编码时是否有放到队列里的视频
     end #spawn process
   end
   
@@ -200,6 +225,7 @@ protected
   
   def change_tv_visibility
     if t = self.tv
+    # if t = Meishi::Tv.find_by_sql("select * from `enjoyoung_production`.tvs where video_id=#{self.id}").first
       t.flv_url = self.asset.url(:transcoded).gsub(/\?\d*$/,'') if self.converted?
       t.flv_url = self.asset.url.gsub(/\?\d*$/,'') if self.no_encoding?
       t.state = self.visibility
